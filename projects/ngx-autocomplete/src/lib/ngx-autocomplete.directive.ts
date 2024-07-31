@@ -1,7 +1,7 @@
 import {
   AfterViewInit,
   ComponentRef, DestroyRef,
-  Directive, effect,
+  Directive,
   ElementRef, EventEmitter,
   input,
   OnDestroy, Output,
