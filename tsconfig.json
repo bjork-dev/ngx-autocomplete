@@ -10,6 +10,11 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
+    "paths": {
+      "ngx-autocomplete": [
+        "./dist/ngx-autocomplete"
+      ]
+    },
     "esModuleInterop": true,
     "sourceMap": true,
     "declaration": false,
