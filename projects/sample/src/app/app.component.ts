@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
+import {Component, signal} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {NxgAutoCompleteDirective} from "../../../ngx-autocomplete/src/lib/ngx-autocomplete.directive";
 
@@ -9,10 +9,14 @@ import {NxgAutoCompleteDirective} from "../../../ngx-autocomplete/src/lib/ngx-au
   styles: [
     `
       .container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+        position: absolute;
+        top:0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        width: 50%;
+        height: 100px;
       }
 
       .card {
@@ -27,27 +31,49 @@ import {NxgAutoCompleteDirective} from "../../../ngx-autocomplete/src/lib/ngx-au
         border: 1px solid #ccc;
         border-radius: 4px;
         display: block;
-        width: 100%;
+        width: 97%;
       }
     `
   ],
   template: `
     <div class="card container">
-      <input [ngxAutoComplete]="sampleData" (ngxAutoCompleteItemSelected)="onItemSelected($event)"
+      <input [ngxAutoComplete]="sampleData"
+             [multiple]="multiple()"
+             (ngxAutoCompleteItemSelected)="onItemSelected($event)"
+             (ngxAutoCompleteItemRemoved)="onItemRemoved($event)"
              placeholder="🔎Search">
 
       <div>
-        <h1 style="font-family: 'Corbel Light',sans-serif">Selected item: {{ selectedItem() }}</h1>
+        <div>
+        </div>
       </div>
     </div>
+    <h1>Selected: {{ selectedItems() }}</h1>
+
   `
 })
 export class AppComponent {
   sampleData = ['Stockholm', 'Oslo', 'Copenhagen', 'Helsinki', 'Amsterdam', 'Figi'];
 
-  selectedItem = signal('');
+  selectedItems = signal<string[]>([]);
+
+  multiple = signal(true);
 
   onItemSelected(item: string) {
-    this.selectedItem.set(item);
+    if(this.multiple()) {
+      this.selectedItems.set([...this.selectedItems(), item]);
+      return;
+    }
+    this.selectedItems.set([item]);
+  }
+
+  onItemRemoved(item: string) {
+
+    if(item === '') {
+      this.selectedItems.set([]);
+      return;
+    }
+
+    this.selectedItems.update(items => items.filter(i => i !== item));
   }
 }
