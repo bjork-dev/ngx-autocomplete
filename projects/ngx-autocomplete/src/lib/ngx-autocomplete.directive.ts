@@ -26,6 +26,9 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
   ngxAutoCompleteItemSelected = output<string>();
   ngxAutoCompleteItemRemoved = output<string>();
 
+  ngxAutoCompleteWindowOpened = output<void>();
+  ngxAutoCompleteWindowClosed = output<void>();
+
   selectionIndex = signal(-1);
 
   private searchResultComponent: ComponentRef<SearchResultComponent>;
@@ -93,7 +96,7 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
       tap((() => {
         this.searchResultComponent.instance.elementRef.nativeElement.style.top = this.elementRef.nativeElement.offsetHeight + 12 + 'px';
         this.searchResultComponent.instance.elementRef.nativeElement.style.width = this.elementRef.nativeElement.offsetWidth + 'px';
-        this.searchResultComponent.instance.hidden = false;
+        this.openWindow();
       }))).subscribe();
 
     fromEvent(document, 'click').pipe(
@@ -101,7 +104,7 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
       tap((event: any) => {
         if (event.target !== this.elementRef.nativeElement
           && this.searchResultComponent.instance.elementRef.nativeElement.contains(event.target) === false) {
-          this.searchResultComponent.instance.hidden = true;
+          this.closeWindow();
         }
       })).subscribe();
 
@@ -116,8 +119,7 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
             } else {
               this.elementRef.nativeElement.value = selectedItem;
               this.ngxAutoCompleteItemSelected.emit(selectedItem);
-              this.elementRef.nativeElement.blur();
-              this.searchResultComponent.instance.hidden = true;
+              this.closeWindow();
             }
           }
         }
@@ -127,8 +129,7 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
       takeUntilDestroyed(this.destroyRef),
       tap((event: any) => {
         if (event.key === 'Escape') {
-          this.searchResultComponent.instance.hidden = true;
-          this.elementRef.nativeElement.blur();
+          this.closeWindow()
         }
       })).subscribe();
 
@@ -181,6 +182,17 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
 
         }
       })).subscribe();
+  }
+
+  closeWindow() {
+    this.searchResultComponent.instance.hidden = true;
+    this.elementRef.nativeElement.blur();
+    this.ngxAutoCompleteWindowClosed.emit()
+  }
+
+  openWindow() {
+    this.searchResultComponent.instance.hidden = false;
+    this.ngxAutoCompleteWindowOpened.emit()
   }
 
 }

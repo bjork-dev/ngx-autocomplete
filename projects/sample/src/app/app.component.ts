@@ -41,6 +41,8 @@ import {NxgAutoCompleteDirective} from "../../../ngx-autocomplete/src/lib/ngx-au
              [multiple]="multiple()"
              (ngxAutoCompleteItemSelected)="onItemSelected($event)"
              (ngxAutoCompleteItemRemoved)="onItemRemoved($event)"
+             (ngxAutoCompleteWindowOpened)="onWindowOpened()"
+             (ngxAutoCompleteWindowClosed)="onWindowClosed()"
              placeholder="🔎Search">
 
       <div>
@@ -49,6 +51,9 @@ import {NxgAutoCompleteDirective} from "../../../ngx-autocomplete/src/lib/ngx-au
       </div>
     </div>
     <h1>Selected: {{ selectedItems() }}</h1>
+    <h1>
+      Window opened: {{ windowOpened() }}
+    </h1>
 
   `
 })
@@ -58,6 +63,8 @@ export class AppComponent {
   selectedItems = signal<string[]>([]);
 
   multiple = signal(true);
+
+  windowOpened = signal(false);
 
   onItemSelected(item: string) {
     if(this.multiple()) {
@@ -75,5 +82,13 @@ export class AppComponent {
     }
 
     this.selectedItems.update(items => items.filter(i => i !== item));
+  }
+
+  onWindowOpened() {
+    this.windowOpened.set(true);
+  }
+
+  onWindowClosed() {
+    this.windowOpened.set(false);
   }
 }
