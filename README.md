@@ -7,18 +7,19 @@
 # Overview
 This library provides a directive that can turn any input field into an autocomplete field. No external dependencies.
 
+# Pre-release limitations
+- Only supports string arrays as input. Objects will be supported in the future.
+- Styling is limited to light and dark themes.
+- Only returns strings. Key accessor to be added.
+- Placement of the window is not configurable.
+
 # Contents
 
 - [Getting Started](#getting-started)
 - [API Reference](#api-reference)
   - [Inputs](#inputs)
   - [Outputs](#outputs)
-  - [Css Classes](#css-classes)
 - [Navigation](#navigation)
-- [Examples](#examples)
-  - [Simple](#simple)
-  - [Advanced](#advanced)
-  - [Bootstrap](#bootstrap)
 
 # Getting Started
 
@@ -34,6 +35,9 @@ Import `NxgAutoCompleteDirective` to your component:
 
 Apply the directive to the input element and provide the data:
 
+```ts
+const sampleData = ['apple', 'banana', 'cherry', 'date'];
+```
 ```html
 <input [ngxAutoComplete]="sampleData" />
 ```
