@@ -1,27 +1,77 @@
-# Autocomplete
+# @bjorkdev/ngx-autocomplete
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.1.3.
+> This package is in pre-release, features are still being added and tested.
 
-## Development server
+## [Demo](https://bjorkdev.github.io/ngx-autocomplete)
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+# Overview
+This library provides a directive that can turn any input field into an autocomplete field. No external dependencies.
 
-## Code scaffolding
+# Contents
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- [Getting Started](#getting-started)
+- [API Reference](#api-reference)
+  - [Inputs](#inputs)
+  - [Outputs](#outputs)
+  - [Css Classes](#css-classes)
+- [Navigation](#navigation)
+- [Examples](#examples)
+  - [Simple](#simple)
+  - [Advanced](#advanced)
+  - [Bootstrap](#bootstrap)
 
-## Build
+# Getting Started
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Import `NxgAutoCompleteDirective` to your component:
 
-## Running unit tests
+```ts
+@Component({
+  selector: 'whatever',
+  standalone: true,
+  imports: [RouterOutlet, NxgAutoCompleteDirective],
+...
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Apply the directive to the input element and provide the data:
 
-## Running end-to-end tests
+```html
+<input [ngxAutoComplete]="sampleData" />
+```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
 
-## Further help
+# API Reference
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Inputs
+
+|       Input        |        Type         | Description                                                                      | Default   |
+| :----------------: |:-------------------:|:---------------------------------------------------------------------------------|:----------|
+|        `ngxAutoComplete`        |     `string[]`      | The data to render.                                                              | `[]`      |
+|       `ngxAutoCompleteMaxResults`       |      `number`       | Max amount of results to display in the window. Default will display everything. | `0`       |
+|   `multiple`    |      `boolean`      | Configures the window to allow multiple selections.                              | `false`   |
+|     `showWindowOnFocus`      |      `boolean`      | Sets whether the window should popup on input focus.                             | `false`   |
+| `style` | `'light' or 'dark'` | Sets the color of the window.                                                    | `light`   |
+| `checkboxColor` |      `string`       | The accent-color of the checkbox if `multiple` is selected.                      | `#a8a8a8` |
+|   `maxHeight`   |      `string`       | Max height of the window.                                                        | `400px`   |
+
+## Outputs
+
+|         Input         |          Type          | Description                                  |
+| :-------------------: | :--------------------: |:---------------------------------------------|
+| `ngxAutoCompleteItemSelected` | `EventEmitter<string>` | Emitted when an item is selected.            |
+| `ngxAutoCompleteItemRemoved` | `EventEmitter<string>` | Emitted when an item is unselected.          |
+| `ngxAutCompleteWindowChanged` | `EventEmitter<NgxAutoCompleteWindowEvent>` | Emitted when the window is opened or closed. |
+
+
+# Navigation
+
+|            Key            |                           Meaning                           |
+|:-------------------------:|:-----------------------------------------------------------:|
+| `arrow up` / `arrow down` |                Navigate through the options.                |
+|          `enter`          | Selects / adds the current active option from the dropdown. |
+|         `escape`          |                     Hides the dropdown.                     |
+|        `Backspace`        |       Removes the last item selected from the input.        |
+
+
+# License
+
+This project is licensed under the [MIT License](https://github.com/bjork-dev/ngx-autocomplete/blob/master/LICENSE).
