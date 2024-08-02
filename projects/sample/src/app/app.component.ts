@@ -9,6 +9,17 @@ import {NgxAutoCompleteWindowEvent} from "../../../ngx-autocomplete/src/lib/ngx-
   imports: [RouterOutlet, NxgAutoCompleteDirective],
   styles: [
     `
+      .row {
+        display: flex;
+        justify-content: space-around;
+      }
+
+      .column {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+      }
+
       input {
         display: block; /* Block needed for popup window to render properly */
         padding: 8px;
@@ -16,42 +27,71 @@ import {NgxAutoCompleteWindowEvent} from "../../../ngx-autocomplete/src/lib/ngx-
         border-radius: 4px;
         width: 50%;
       }
+
+      .dark {
+        background-color: #3a3a3a;
+        color: white;
+      }
     `
   ],
   template: `
-    <h1>Multiple selection</h1>
-    <h3>Selected: {{ multipleItems() }}</h3>
-    <h3>
-      Window opened: {{ multipleWindowOpened() }}
-    </h3>
-    <div>
-      <input [ngxAutoComplete]="sampleData"
-             [multiple]="true"
-             [showWindowOnFocus]="true"
-             (ngxAutoCompleteItemSelected)="onMultipleItemSelected($event)"
-             (ngxAutoCompleteItemRemoved)="onMultipleItemRemoved($event)"
-             (ngxAutCompleteWindowChanged)="onMultipleWindowChange($event)"
-             placeholder="🔎Search">
+    <div class="row">
+      <div class="column">
+        <h1>Multiple selection</h1>
+        <h3>Selected: {{ multipleItems() }}</h3>
+        <h3>
+          Window opened: {{ multipleWindowOpened() }}
+        </h3>
+        <div>
+          <input [ngxAutoComplete]="sampleData"
+                 [multiple]="true"
+                 [showWindowOnFocus]="true"
+                 (ngxAutoCompleteItemSelected)="onMultipleItemSelected($event)"
+                 (ngxAutoCompleteItemRemoved)="onMultipleItemRemoved($event)"
+                 (ngxAutCompleteWindowChanged)="onMultipleWindowChange($event)"
+                 placeholder="🔎Search">
 
+        </div>
+      </div>
+
+      <div class="column">
+
+        <h1>Single selection</h1>
+        <h3>Selected: {{ singleItem() }}</h3>
+        <h3>
+          Window opened: {{ singleWindowOpened() }}
+        </h3>
+        <div>
+          <input
+            [ngxAutoComplete]="sampleData"
+            [showWindowOnFocus]="true"
+            [multiple]="false"
+            (ngxAutoCompleteItemSelected)="onSingleItemSelected($event)"
+            (ngxAutoCompleteItemRemoved)="onSingleItemRemoved()"
+            (ngxAutCompleteWindowChanged)="onSingleWindowChange($event)"
+            placeholder="🔎Search">
+
+        </div>
+      </div>
     </div>
     <div style="height: 300px"></div>
-    <h1>Single selection</h1>
-    <h3>Selected: {{ singleItem() }}</h3>
-    <h3>
-      Window opened: {{ singleWindowOpened() }}
-    </h3>
-    <div>
-      <input
-        [ngxAutoComplete]="sampleData"
-        [showWindowOnFocus]="true"
-        [multiple]="false"
-        (ngxAutoCompleteItemSelected)="onSingleItemSelected($event)"
-        (ngxAutoCompleteItemRemoved)="onSingleItemRemoved()"
-        (ngxAutCompleteWindowChanged)="onSingleWindowChange($event)"
-        placeholder="🔎Search">
 
+    <div class="row">
+      <div class="column">
+        <h1>Dark mode with custom checkbox color</h1>
+        <div>
+          <input class="dark"
+                 [ngxAutoComplete]="sampleData"
+                 [showWindowOnFocus]="true"
+                 [multiple]="true"
+                 [style]="'dark'"
+                 [checkboxColor]="'#00ef0b'"
+                 [maxHeight]="'150px'"
+                 [ngxAutoCompleteMaxResults]="3"
+                 placeholder="🔎Search">
+        </div>
+      </div>
     </div>
-
   `
 })
 export class AppComponent {

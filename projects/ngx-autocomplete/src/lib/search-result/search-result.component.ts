@@ -1,22 +1,31 @@
 import {Component, ElementRef, EventEmitter, Renderer2, signal} from '@angular/core';
-import {NgStyle} from "@angular/common";
+import {NgClass, NgStyle} from "@angular/common";
 
 @Component({
   selector: 'search-result',
   standalone: true,
   imports: [
-    NgStyle
+    NgStyle,
+    NgClass
   ],
   styles: [
     `
-      .card {
+      .ngx-autocomplete-card {
         border: 1px solid #c3c3c3;
         border-radius: 8px 8px 8px 8px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         z-index: 9999;
-        background-color: white;
-        max-height: 400px;
         overflow-y: auto;
+      }
+
+      .light {
+        background-color: white;
+        color: #353535;
+      }
+
+      .dark {
+        background-color: #3a3a3a;
+        color: white;
       }
 
       .item {
@@ -25,12 +34,20 @@ import {NgStyle} from "@angular/common";
         user-select: none;
       }
 
-      .item:hover {
+      .light .item:hover {
         background-color: #f9f9f9;
       }
 
-      .highlight {
+      .dark .item:hover {
+        background-color: #2a2a2a;
+      }
+
+      .light .highlight {
         background-color: #f9f9f9;
+      }
+
+      .dark .highlight {
+        background-color: #2a2a2a;
       }
 
       .container {
@@ -41,12 +58,17 @@ import {NgStyle} from "@angular/common";
   ],
   template: `
     @if (!hidden()) {
-      <div class="card">
+      <div class="ngx-autocomplete-card" [ngClass]="{
+        'light': style() === 'light',
+        'dark': style() === 'dark'
+      }" [ngStyle]="{'max-height': maxHeight()
+      } ">
         @for (item of items(); track item) {
           <div class="container">
-            <div class="item" (click)="selectItem(item)">
-              @if (multiple) {
-                <input type="checkbox" [checked]="checked(item)">
+            <div class="item"
+                 (click)="selectItem(item)">
+              @if (multiple()) {
+                <input type="checkbox" [ngStyle]="{'accent-color': checkboxColor()}" [checked]="checked(item)">
               }
               {{ item }}
             </div>
@@ -59,7 +81,10 @@ import {NgStyle} from "@angular/common";
 export class SearchResultComponent {
   hidden = signal(true);
   items = signal<string[]>([]);
-  multiple = false;
+  multiple = signal(false);
+  style = signal<'light' | 'dark'>('light');
+  checkboxColor = signal<string>('#a8a8a8');
+  maxHeight = signal<string>('400px');
 
   _selectedItems = signal<string[]>([]);
 

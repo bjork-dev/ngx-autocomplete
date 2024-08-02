@@ -25,6 +25,9 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
   ngxAutoCompleteMaxResults = input<number>(0);
   multiple = input<boolean>(false);
   showWindowOnFocus = input<boolean>(false);
+  style = input<'light' | 'dark'>('light');
+  checkboxColor = input<string>('#a8a8a8');
+  maxHeight = input<string>('400px');
 
   ngxAutoCompleteItemSelected = output<string>();
   ngxAutoCompleteItemRemoved = output<string>();
@@ -68,7 +71,10 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.searchResultComponent.instance.multiple = this.multiple();
+    this.searchResultComponent.instance.multiple.set(this.multiple());
+    this.searchResultComponent.instance.style.set(this.style());
+    this.searchResultComponent.instance.checkboxColor.set(this.checkboxColor());
+    this.searchResultComponent.instance.maxHeight.set(this.maxHeight());
 
     if (this.ngxAutoCompleteMaxResults() > 0) {
       this.searchResultComponent.instance.items.set(this.ngxAutoComplete().slice(0, this.ngxAutoCompleteMaxResults()));
@@ -81,7 +87,7 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
     fromEvent(this.elementRef.nativeElement, 'input').pipe(
       takeUntilDestroyed(this.destroyRef),
       tap(((event: any) => {
-        let query = event.target.value;
+        let query = event.target.value.split(',').pop().trim();
 
         if (query === '') {
           this.searchResultComponent.instance._selectedItems.set([]);
