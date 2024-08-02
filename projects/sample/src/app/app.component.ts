@@ -2,6 +2,7 @@ import {Component, signal} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {NxgAutoCompleteDirective} from "../../../ngx-autocomplete/src/lib/ngx-autocomplete.directive";
 import {NgxAutoCompleteWindowEvent} from "../../../ngx-autocomplete/src/lib/ngx-auto-complete-window.event";
+import {bigSampleData} from "./big-data";
 
 @Component({
   selector: 'app-root',
@@ -81,7 +82,7 @@ import {NgxAutoCompleteWindowEvent} from "../../../ngx-autocomplete/src/lib/ngx-
         <h1>Dark mode with custom checkbox color</h1>
         <div>
           <input class="dark"
-                 [ngxAutoComplete]="sampleData"
+                 [ngxAutoComplete]="bigSampleData"
                  [showWindowOnFocus]="true"
                  [multiple]="true"
                  [style]="'dark'"
@@ -131,4 +132,6 @@ export class AppComponent {
   onMultipleWindowChange(event: NgxAutoCompleteWindowEvent) {
     this.multipleWindowOpened.set(event.opened);
   }
+
+  protected readonly bigSampleData = bigSampleData;
 }
