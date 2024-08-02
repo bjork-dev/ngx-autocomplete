@@ -1,6 +1,7 @@
 import {Component, signal} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {NxgAutoCompleteDirective} from "../../../ngx-autocomplete/src/lib/ngx-autocomplete.directive";
+import {NgxAutoCompleteWindowEvent} from "../../../ngx-autocomplete/src/lib/ngx-auto-complete-window.event";
 
 @Component({
   selector: 'app-root',
@@ -8,87 +9,86 @@ import {NxgAutoCompleteDirective} from "../../../ngx-autocomplete/src/lib/ngx-au
   imports: [RouterOutlet, NxgAutoCompleteDirective],
   styles: [
     `
-      .container {
-        position: absolute;
-        top:0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: auto;
-        width: 50%;
-        height: 100px;
-      }
-
-      .card {
-        border: 1px solid #c3c3c3;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        padding: 12px;
-      }
-
       input {
+        display: block; /* Block needed for popup window to render properly */
         padding: 8px;
         border: 1px solid #ccc;
         border-radius: 4px;
-        display: block;
-        width: 97%;
+        width: 50%;
       }
     `
   ],
   template: `
-    <div class="card container">
+    <h1>Multiple selection</h1>
+    <h3>Selected: {{ multipleItems() }}</h3>
+    <h3>
+      Window opened: {{ multipleWindowOpened() }}
+    </h3>
+    <div>
       <input [ngxAutoComplete]="sampleData"
-             [multiple]="multiple()"
-             (ngxAutoCompleteItemSelected)="onItemSelected($event)"
-             (ngxAutoCompleteItemRemoved)="onItemRemoved($event)"
-             (ngxAutoCompleteWindowOpened)="onWindowOpened()"
-             (ngxAutoCompleteWindowClosed)="onWindowClosed()"
+             [multiple]="true"
+             [showWindowOnFocus]="true"
+             (ngxAutoCompleteItemSelected)="onMultipleItemSelected($event)"
+             (ngxAutoCompleteItemRemoved)="onMultipleItemRemoved($event)"
+             (ngxAutCompleteWindowChanged)="onMultipleWindowChange($event)"
              placeholder="🔎Search">
 
-      <div>
-        <div>
-        </div>
-      </div>
     </div>
-    <h1>Selected: {{ selectedItems() }}</h1>
-    <h1>
-      Window opened: {{ windowOpened() }}
-    </h1>
+    <div style="height: 300px"></div>
+    <h1>Single selection</h1>
+    <h3>Selected: {{ singleItem() }}</h3>
+    <h3>
+      Window opened: {{ singleWindowOpened() }}
+    </h3>
+    <div>
+      <input
+        [ngxAutoComplete]="sampleData"
+        [showWindowOnFocus]="true"
+        [multiple]="false"
+        (ngxAutoCompleteItemSelected)="onSingleItemSelected($event)"
+        (ngxAutoCompleteItemRemoved)="onSingleItemRemoved()"
+        (ngxAutCompleteWindowChanged)="onSingleWindowChange($event)"
+        placeholder="🔎Search">
+
+    </div>
 
   `
 })
 export class AppComponent {
   sampleData = ['Stockholm', 'Oslo', 'Copenhagen', 'Helsinki', 'Amsterdam', 'Figi'];
 
-  selectedItems = signal<string[]>([]);
+  singleItem = signal<string>('');
+  multipleItems = signal<string[]>([]);
 
-  multiple = signal(true);
+  singleWindowOpened = signal(false);
+  multipleWindowOpened = signal(false);
 
-  windowOpened = signal(false);
+  onMultipleItemSelected(item: string) {
+    this.multipleItems.set([...this.multipleItems(), item]);
+  }
 
-  onItemSelected(item: string) {
-    if(this.multiple()) {
-      this.selectedItems.set([...this.selectedItems(), item]);
+  onSingleItemSelected(item: string) {
+    this.singleItem.set(item);
+  }
+
+  onMultipleItemRemoved(item: string) {
+    if (item === '') {
+      this.multipleItems.set([]);
       return;
     }
-    this.selectedItems.set([item]);
+
+    this.multipleItems.update(items => items.filter(i => i !== item));
   }
 
-  onItemRemoved(item: string) {
-
-    if(item === '') {
-      this.selectedItems.set([]);
-      return;
-    }
-
-    this.selectedItems.update(items => items.filter(i => i !== item));
+  onSingleItemRemoved() {
+    this.singleItem.set('');
   }
 
-  onWindowOpened() {
-    this.windowOpened.set(true);
+  onSingleWindowChange(event: NgxAutoCompleteWindowEvent) {
+    this.singleWindowOpened.set(event.opened);
   }
 
-  onWindowClosed() {
-    this.windowOpened.set(false);
+  onMultipleWindowChange(event: NgxAutoCompleteWindowEvent) {
+    this.multipleWindowOpened.set(event.opened);
   }
 }

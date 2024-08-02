@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Renderer2, signal} from '@angular/core';
 import {NgStyle} from "@angular/common";
 
 @Component({
@@ -23,7 +23,6 @@ import {NgStyle} from "@angular/common";
         padding: 12px;
         width: 100%;
         user-select: none;
-        font-family: inherit;
       }
 
       .item:hover {
@@ -41,11 +40,10 @@ import {NgStyle} from "@angular/common";
     `
   ],
   template: `
-    @if (!hidden) {
+    @if (!hidden()) {
       <div class="card">
-        @for (item of items; track item) {
+        @for (item of items(); track item) {
           <div class="container">
-
             <div class="item" (click)="selectItem(item)">
               @if (multiple) {
                 <input type="checkbox" [checked]="checked(item)">
@@ -59,22 +57,22 @@ import {NgStyle} from "@angular/common";
   `
 })
 export class SearchResultComponent {
-  hidden = false;
-  items: string[] = [];
+  hidden = signal(true);
+  items = signal<string[]>([]);
   multiple = false;
 
-  _selectedItems: string[] = [];
+  _selectedItems = signal<string[]>([]);
 
   itemSelected = new EventEmitter<string>();
   itemRemoved = new EventEmitter<string>();
 
-  constructor(public elementRef: ElementRef) {
+  constructor(public renderer: Renderer2, public elementRef: ElementRef) {
 
   }
 
   selectItem(item: string) {
-    if (!this._selectedItems.includes(item)) {
-      this._selectedItems.push(item);
+    if (!this._selectedItems().includes(item)) {
+      this._selectedItems.update(i => [...i, item]);
       this.itemSelected.emit(item);
     } else {
       this.removeItem(item);
@@ -82,11 +80,11 @@ export class SearchResultComponent {
   }
 
   removeItem(item: string) {
-    this._selectedItems = this._selectedItems.filter(i => i !== item);
+    this._selectedItems.update(i => i.filter(i => i !== item));
     this.itemRemoved.emit(item);
   }
 
   checked(item: string): boolean {
-    return this._selectedItems.includes(item);
+    return this._selectedItems().includes(item);
   }
 }
