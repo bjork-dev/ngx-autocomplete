@@ -66,7 +66,7 @@ import {NgClass, NgStyle} from "@angular/common";
         @for (item of items(); track item) {
           <div class="container">
             <div class="item"
-                 (click)="selectItem(item)">
+                 (click)="selectOrRemoveItem(item)">
               @if (multiple()) {
                 <input type="checkbox" [ngStyle]="{'accent-color': checkboxColor()}" [checked]="checked(item)">
               }
@@ -95,7 +95,7 @@ export class SearchResultComponent {
 
   }
 
-  selectItem(item: string) {
+  selectOrRemoveItem(item: string) {
     if (!this._selectedItems().includes(item)) {
       this._selectedItems.update(i => [...i, item]);
       this.itemSelected.emit(item);

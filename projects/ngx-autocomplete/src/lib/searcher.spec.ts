@@ -32,6 +32,13 @@ describe('Searcher', () => {
     expect(result.length).toEqual(2);
   });
 
+
+  it('should have stockholm as first result', () => {
+    const result = searcher.search('sto', 2);
+    expect(result.length).toEqual(2);
+    expect(result[0]).toEqual('Stockholm');
+  });
+
   it('should only return items that have matching characters', () => {
     const result = searcher.search('Figi');
     expect(result.length).toEqual(3);

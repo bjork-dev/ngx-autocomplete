@@ -3,4 +3,4 @@
  */
 
 export * from './lib/ngx-autocomplete.directive';
-export {NgxAutoCompleteWindowEvent} from "./lib/ngx-auto-complete-window.event";
+export {NgxAutoCompleteWindowEvent} from "./lib/events/ngx-auto-complete-window.event";

@@ -14,7 +14,7 @@ import {Searcher} from "./searcher";
 import {SearchResultComponent} from "./search-result/search-result.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {filter, fromEvent, tap} from "rxjs";
-import {NgxAutoCompleteWindowEvent} from "./ngx-auto-complete-window.event";
+import {NgxAutoCompleteWindowEvent} from "./events/ngx-auto-complete-window.event";
 
 @Directive({
   standalone: true,
@@ -43,6 +43,8 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
     this.searchResultComponent = viewContainerRef.createComponent(SearchResultComponent);
 
     this.searchResultComponent.instance.renderer.setStyle(this.searchResultComponent.instance.elementRef.nativeElement, 'position', 'absolute');
+
+
 
     this.searchResultComponent.instance.itemSelected.pipe(
       takeUntilDestroyed(),
@@ -90,8 +92,8 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
         let query = event.target.value.split(',').pop().trim();
 
         if (query === '') {
-          this.searchResultComponent.instance._selectedItems.set([]);
-          this.ngxAutoCompleteItemRemoved.emit('');
+          // this.searchResultComponent.instance._selectedItems.set([]);
+          // this.ngxAutoCompleteItemRemoved.emit('');
           return;
         }
 
@@ -133,13 +135,30 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
           const selectedItem = this.searchResultComponent.instance.items()[this.selectionIndex()];
           if (selectedItem) {
             if (this.multiple()) {
-              this.searchResultComponent.instance.selectItem((selectedItem));
+              this.searchResultComponent.instance.selectOrRemoveItem((selectedItem));
             } else {
               this.renderer.setProperty(this.elementRef.nativeElement, 'value', selectedItem);
               this.ngxAutoCompleteItemSelected.emit(selectedItem);
               this.closeWindow();
             }
           }
+        }
+      })).subscribe();
+
+    fromEvent(document, 'keydown').pipe(
+      takeUntilDestroyed(this.destroyRef),
+      filter(() => !this.searchResultComponent.instance.hidden()),
+      tap((event: any) => {
+        if (event.key === 'Backspace') {
+          event.preventDefault();
+          const items = this.searchResultComponent.instance._selectedItems();
+
+          if (items.length === 0) {
+            return;
+          }
+
+          const lastItem = items[items.length - 1];
+          this.searchResultComponent.instance.selectOrRemoveItem((lastItem));
         }
       })).subscribe();
 

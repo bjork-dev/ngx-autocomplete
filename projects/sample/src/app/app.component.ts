@@ -1,7 +1,7 @@
 import {Component, signal} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {NxgAutoCompleteDirective} from "../../../ngx-autocomplete/src/lib/ngx-autocomplete.directive";
-import {NgxAutoCompleteWindowEvent} from "../../../ngx-autocomplete/src/lib/ngx-auto-complete-window.event";
+import {NgxAutoCompleteWindowEvent} from "../../../ngx-autocomplete/src/lib/events/ngx-auto-complete-window.event";
 import {bigSampleData} from "./big-data";
 
 @Component({
