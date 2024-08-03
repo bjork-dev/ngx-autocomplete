@@ -41,10 +41,7 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
               private destroyRef: DestroyRef) {
 
     this.searchResultComponent = viewContainerRef.createComponent(SearchResultComponent);
-
     this.searchResultComponent.instance.renderer.setStyle(this.searchResultComponent.instance.elementRef.nativeElement, 'position', 'absolute');
-
-
 
     this.searchResultComponent.instance.itemSelected.pipe(
       takeUntilDestroyed(),
@@ -92,8 +89,6 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
         let query = event.target.value.split(',').pop().trim();
 
         if (query === '') {
-          // this.searchResultComponent.instance._selectedItems.set([]);
-          // this.ngxAutoCompleteItemRemoved.emit('');
           return;
         }
 
