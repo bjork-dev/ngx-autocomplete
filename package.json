@@ -1,6 +1,6 @@
 {
-  "name": "autocomplete",
-  "version": "0.0.0",
+  "name": "@bjorkdev/ngx-autocomplete",
+  "version": "0.1.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
-  "private": true,
+  "private": false,
   "dependencies": {
     "@angular/animations": "^18.1.0",
     "@angular/common": "^18.1.0",
