@@ -59,11 +59,11 @@ const sampleData = ['apple', 'banana', 'cherry', 'date'];
 
 ## Outputs
 
-|         Input         |          Type          | Description                                  |
-| :-------------------: | :--------------------: |:---------------------------------------------|
-| `ngxAutoCompleteItemSelected` | `EventEmitter<string>` | Emitted when an item is selected.            |
-| `ngxAutoCompleteItemRemoved` | `EventEmitter<string>` | Emitted when an item is unselected.          |
-| `ngxAutCompleteWindowChanged` | `EventEmitter<NgxAutoCompleteWindowEvent>` | Emitted when the window is opened or closed. |
+|             Input              |          Type          | Description                                  |
+|:------------------------------:| :--------------------: |:---------------------------------------------|
+| `ngxAutoCompleteItemSelected`  | `EventEmitter<string>` | Emitted when an item is selected.            |
+|  `ngxAutoCompleteItemRemoved`  | `EventEmitter<string>` | Emitted when an item is unselected.          |
+| `ngxAutoCompleteWindowChanged` | `EventEmitter<NgxAutoCompleteWindowEvent>` | Emitted when the window is opened or closed. |
 
 
 # Navigation
