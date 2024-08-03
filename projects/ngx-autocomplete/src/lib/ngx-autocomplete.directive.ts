@@ -17,6 +17,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {filter, fromEvent, tap} from "rxjs";
 import {NgxAutoCompleteWindowEvent} from "./events/ngx-auto-complete-window.event";
 import {NgxAutoCompleteDataItem} from "./ngx-auto-complete-data.item";
+import { v4 as uuidv4 } from 'uuid';
 
 @Directive({
   standalone: true,
@@ -38,8 +39,8 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
   selectionIndex = signal(-1);
 
   dataItems = computed(() => {
-    return this.ngxAutoComplete().map((item, index) => {
-      return {value: item, id: crypto.randomUUID()} as NgxAutoCompleteDataItem;
+    return this.ngxAutoComplete().map((item, _) => {
+      return {value: item, id: uuidv4()} as NgxAutoCompleteDataItem;
     });
   });
 

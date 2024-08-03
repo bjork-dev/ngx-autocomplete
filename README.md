@@ -5,7 +5,7 @@
 ## [Demo](https://bjorkdev.github.io/ngx-autocomplete)
 
 # Overview
-This library provides a directive that can turn any input field into an autocomplete field. No external dependencies.
+This library provides a directive that can turn any input field into an autocomplete field.
 
 # Pre-release limitations
 - Only supports string arrays as input. Objects will be supported in the future.
@@ -29,7 +29,7 @@ Import `NxgAutoCompleteDirective` to your component:
 @Component({
   selector: 'whatever',
   standalone: true,
-  imports: [RouterOutlet, NxgAutoCompleteDirective],
+  imports: [NxgAutoCompleteDirective]
 ...
 ```
 
