@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, Component, effect, signal} from '@angular/core'
 import {RouterOutlet} from '@angular/router';
 import {NxgAutoCompleteDirective} from "../../../ngx-autocomplete/src/lib/ngx-autocomplete.directive";
 import {NgxAutoCompleteWindowEvent} from "../../../ngx-autocomplete/src/lib/events/ngx-auto-complete-window.event";
+import {bigSampleData} from "./big-data";
 
 @Component({
   selector: 'app-root',
@@ -85,7 +86,7 @@ import {NgxAutoCompleteWindowEvent} from "../../../ngx-autocomplete/src/lib/even
     <div class="card">
       <div class="container">
         <input class="search"
-               [ngxAutoComplete]="sampleData"
+               [ngxAutoComplete]="bigSampleData"
                [multiple]="multiple()"
                [ngxAutoCompleteMaxResults]="maxResults()"
                [showWindowOnFocus]="showWindowOnFocus()"
@@ -102,8 +103,6 @@ import {NgxAutoCompleteWindowEvent} from "../../../ngx-autocomplete/src/lib/even
   `
 })
 export class AppComponent {
-  sampleData = ['Stockholm', 'Oslo', 'Copenhagen', 'Helsinki', 'Amsterdam', 'Figi'];
-
   maxResults = signal<number>(0);
   multiple = signal<boolean>(true);
   showWindowOnFocus = signal<boolean>(true);
@@ -190,4 +189,6 @@ export class AppComponent {
   setMaxHeight(target: EventTarget | null) {
     this.maxHeight.set((target as HTMLInputElement).value);
   }
+
+  protected readonly bigSampleData = bigSampleData;
 }

@@ -1,5 +1,6 @@
 import {Component, ElementRef, EventEmitter, Renderer2, signal} from '@angular/core';
 import {NgClass, NgStyle} from "@angular/common";
+import {NgxAutoCompleteDataItem} from "../ngx-auto-complete-data.item";
 
 @Component({
   selector: 'search-result',
@@ -63,14 +64,14 @@ import {NgClass, NgStyle} from "@angular/common";
         'dark': style() === 'dark'
       }" [ngStyle]="{'max-height': maxHeight()
       } ">
-        @for (item of items(); track item) {
+        @for (item of items(); track item.id) {
           <div class="container">
             <div class="item"
                  (click)="selectOrRemoveItem(item)">
               @if (multiple()) {
                 <input type="checkbox" [ngStyle]="{'accent-color': checkboxColor()}" [checked]="checked(item)">
               }
-              {{ item }}
+              {{ item.value }}
             </div>
           </div>
         }
@@ -80,23 +81,42 @@ import {NgClass, NgStyle} from "@angular/common";
 })
 export class SearchResultComponent {
   hidden = signal(true);
-  items = signal<string[]>([]);
+  items = signal<NgxAutoCompleteDataItem[]>([]);
   multiple = signal(false);
   style = signal<'light' | 'dark'>('light');
   checkboxColor = signal<string>('#a8a8a8');
   maxHeight = signal<string>('400px');
 
-  _selectedItems = signal<string[]>([]);
+  _selectedItems = signal<NgxAutoCompleteDataItem[]>([]);
 
-  itemSelected = new EventEmitter<string>();
-  itemRemoved = new EventEmitter<string>();
+  itemSelected = new EventEmitter<NgxAutoCompleteDataItem>();
+  itemRemoved = new EventEmitter<NgxAutoCompleteDataItem>();
 
   constructor(public renderer: Renderer2, public elementRef: ElementRef) {
 
   }
 
-  selectOrRemoveItem(item: string) {
-    if (!this._selectedItems().includes(item)) {
+  selectOrRemoveItem(item: NgxAutoCompleteDataItem) {
+
+    if (!this.multiple()) {
+      const prevItem = this._selectedItems();
+
+      if (prevItem[0] === item) {
+        return;
+      }
+
+      if (prevItem.length > 0) {
+        this.removeItem(prevItem[0]);
+      }
+
+      this._selectedItems.set([item]);
+      this.itemSelected.emit(item);
+      return;
+    }
+
+    const idExists = this._selectedItems().some(i => i.id === item.id);
+
+    if (!idExists) {
       this._selectedItems.update(i => [...i, item]);
       this.itemSelected.emit(item);
     } else {
@@ -104,12 +124,12 @@ export class SearchResultComponent {
     }
   }
 
-  removeItem(item: string) {
+  removeItem(item: NgxAutoCompleteDataItem) {
     this._selectedItems.update(i => i.filter(i => i !== item));
     this.itemRemoved.emit(item);
   }
 
-  checked(item: string): boolean {
+  checked(item: NgxAutoCompleteDataItem): boolean {
     return this._selectedItems().includes(item);
   }
 }

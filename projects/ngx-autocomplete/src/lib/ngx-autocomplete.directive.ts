@@ -1,8 +1,9 @@
 import {
   AfterViewInit,
-  ComponentRef,
+  ComponentRef, computed,
   DestroyRef,
-  Directive, effect,
+  Directive,
+  effect,
   ElementRef,
   input,
   output,
@@ -15,6 +16,7 @@ import {SearchResultComponent} from "./search-result/search-result.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {filter, fromEvent, tap} from "rxjs";
 import {NgxAutoCompleteWindowEvent} from "./events/ngx-auto-complete-window.event";
+import {NgxAutoCompleteDataItem} from "./ngx-auto-complete-data.item";
 
 @Directive({
   standalone: true,
@@ -35,6 +37,12 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
 
   selectionIndex = signal(-1);
 
+  dataItems = computed(() => {
+    return this.ngxAutoComplete().map((item, index) => {
+      return {value: item, id: crypto.randomUUID()} as NgxAutoCompleteDataItem;
+    });
+  });
+
   private searchResultComponent: ComponentRef<SearchResultComponent>;
 
   constructor(private elementRef: ElementRef, private renderer: Renderer2, viewContainerRef: ViewContainerRef,
@@ -48,36 +56,36 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
 
     this.searchResultComponent.instance.itemSelected.pipe(
       takeUntilDestroyed(),
-      tap((item: string) => {
+      tap((item) => {
         if (this.multiple()) {
-          const items = this.searchResultComponent.instance._selectedItems();
+          const items = this.searchResultComponent.instance._selectedItems().map(i => i.value);
           this.renderer.setProperty(this.elementRef.nativeElement, 'value', items.join(', ') + ', ');
         } else {
-          this.renderer.setProperty(this.elementRef.nativeElement, 'value', item);
+          this.renderer.setProperty(this.elementRef.nativeElement, 'value', item.value);
           this.closeWindow();
         }
         const index = this.searchResultComponent.instance.items().indexOf(item);
         this.selectionIndex.set(index);
-        this.ngxAutoCompleteItemSelected.emit(item);
+        this.ngxAutoCompleteItemSelected.emit(item.value);
       }))
       .subscribe();
 
     this.searchResultComponent.instance.itemRemoved.pipe(
       takeUntilDestroyed(),
-      tap(((item: string) => {
+      tap(((item) => {
         if (this.multiple()) {
-          this.renderer.setProperty(this.elementRef.nativeElement, 'value', this.elementRef.nativeElement.value.replace(item + ', ', ''));
+          this.renderer.setProperty(this.elementRef.nativeElement, 'value', this.elementRef.nativeElement.value.replace(item.value + ', ', ''));
         } else {
           this.clearInput();
         }
-        this.ngxAutoCompleteItemRemoved.emit(item);
+        this.ngxAutoCompleteItemRemoved.emit(item.value);
       })))
       .subscribe();
 
   }
 
   ngAfterViewInit(): void {
-    const searcher = new Searcher(this.ngxAutoComplete());
+    const searcher = new Searcher(this.dataItems());
 
     fromEvent(this.elementRef.nativeElement, 'input').pipe(
       takeUntilDestroyed(this.destroyRef),
@@ -180,7 +188,7 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
           this.selectionIndex.set(0);
         }
         if (!this.multiple()) {
-          this.renderer.setProperty(this.elementRef.nativeElement, 'value', this.searchResultComponent.instance.items()[this.selectionIndex()]);
+          this.renderer.setProperty(this.elementRef.nativeElement, 'value', this.searchResultComponent.instance.items()[this.selectionIndex()].value);
         }
 
         const childItems = this.searchResultComponent.instance.elementRef.nativeElement.children[0].children;
@@ -206,7 +214,7 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
         }
 
         if (!this.multiple()) {
-          this.renderer.setProperty(this.elementRef.nativeElement, 'value', this.searchResultComponent.instance.items()[this.selectionIndex()]);
+          this.renderer.setProperty(this.elementRef.nativeElement, 'value', this.searchResultComponent.instance.items()[this.selectionIndex()].value);
         }
 
         const childItems = this.searchResultComponent.instance.elementRef.nativeElement.children[0].children;
@@ -229,9 +237,9 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
     this.searchResultComponent.instance.maxHeight.set(this.maxHeight());
 
     if (this.ngxAutoCompleteMaxResults() > 0) {
-      this.searchResultComponent.instance.items.set(this.ngxAutoComplete().slice(0, this.ngxAutoCompleteMaxResults()));
+      this.searchResultComponent.instance.items.set(this.dataItems().slice(0, this.ngxAutoCompleteMaxResults()));
     } else {
-      this.searchResultComponent.instance.items.set(this.ngxAutoComplete());
+      this.searchResultComponent.instance.items.set(this.dataItems());
     }
   }
 

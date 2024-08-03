@@ -1,18 +1,20 @@
+import {NgxAutoCompleteDataItem} from "./ngx-auto-complete-data.item";
+
 class Rater {
-  item: string;
+  item: NgxAutoCompleteDataItem;
   penalty = 0;
   foundChars = 0;
 
-  constructor(item: string) {
+  constructor(item: NgxAutoCompleteDataItem) {
     this.item = item;
   }
 }
 
 export class Searcher {
-  constructor(private allItems: string[]) {
+  constructor(private allItems: NgxAutoCompleteDataItem[]) {
   }
 
-  public search(query: string, maxCount: number = 0): string[] {
+  public search(query: string, maxCount: number = 0): NgxAutoCompleteDataItem[] {
     if (query === '') {
       return this.allItems;
     }
@@ -45,7 +47,7 @@ export class Searcher {
   }
 
   private rateItem(query: string, rater: Rater): Rater {
-    let destination = rater.item.toLowerCase();
+    let destination = rater.item.value.toLowerCase();
     let firstMatch = true;
 
     for (let i = 0; i < query.length; i++) {
@@ -63,7 +65,7 @@ export class Searcher {
       }
 
       if (index + 1 < destination.length) {
-        destination = rater.item.substring(index + 1);
+        destination = rater.item.value.substring(index + 1);
       } else {
         destination = '';
       }

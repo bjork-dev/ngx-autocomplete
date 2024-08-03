@@ -68,13 +68,16 @@ const sampleData = ['apple', 'banana', 'cherry', 'date'];
 
 # Navigation
 
-|            Key            |                           Meaning                           |
-|:-------------------------:|:-----------------------------------------------------------:|
-| `arrow up` / `arrow down` |                Navigate through the options.                |
-|          `enter`          | Selects / adds the current active option from the dropdown. |
-|         `escape`          |                     Hides the dropdown.                     |
-|        `Backspace`        |       Removes the last item selected from the input.        |
+|            Key            |                                        Meaning                                        |
+|:-------------------------:|:-------------------------------------------------------------------------------------:|
+| `arrow up` / `arrow down` |                             Navigate through the options.                             |
+|          `enter`          |              Selects / adds the current active option from the dropdown.              |
+|         `escape`          |                                  Hides the dropdown.                                  |
+|        `Backspace`        | Removes the last item selected from the input or the last character if partial query. |
 
+
+# Full Example
+https://github.com/bjork-dev/ngx-autocomplete/blob/master/projects/sample/src/app/app.component.ts
 
 # License
 
