@@ -2,7 +2,7 @@
 
 > This package is in pre-release, features are still being added and tested.
 
-## [Demo](https://bjorkdev.github.io/ngx-autocomplete)
+## [Demo](https://bjork-dev.github.io/ngx-autocomplete/)
 
 # Overview
 This library provides a directive that can turn any input field into an autocomplete field.
