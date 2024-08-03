@@ -1,96 +1,102 @@
-import {Component, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, signal} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {NxgAutoCompleteDirective} from "../../../ngx-autocomplete/src/lib/ngx-autocomplete.directive";
 import {NgxAutoCompleteWindowEvent} from "../../../ngx-autocomplete/src/lib/events/ngx-auto-complete-window.event";
-import {bigSampleData} from "./big-data";
 
 @Component({
   selector: 'app-root',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet, NxgAutoCompleteDirective],
   styles: [
     `
-      .row {
-        display: flex;
-        justify-content: space-around;
-      }
 
-      .column {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-      }
-
-      input {
-        display: block; /* Block needed for popup window to render properly */
+      .search {
         padding: 8px;
         border: 1px solid #ccc;
         border-radius: 4px;
         width: 50%;
       }
 
-      .dark {
-        background-color: #3a3a3a;
-        color: white;
+      .card {
+        border: 1px solid #c3c3c3;
+        border-radius: 8px 8px 8px 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+        padding: 20px;
+        margin: 0 30px 0 30px;
       }
+
+      .container {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+      }
+
     `
   ],
   template: `
-    <div class="row">
-      <div class="column">
-        <h1>Multiple selection</h1>
-        <h3>Selected: {{ multipleItems() }}</h3>
-        <h3>
-          Window opened: {{ multipleWindowOpened() }}
-        </h3>
+    <h1>ngx-autocomplete Demo</h1>
+    <div class="card">
+      <h3>Configure</h3>
         <div>
-          <input [ngxAutoComplete]="sampleData"
-                 [multiple]="true"
-                 [showWindowOnFocus]="true"
-                 (ngxAutoCompleteItemSelected)="onMultipleItemSelected($event)"
-                 (ngxAutoCompleteItemRemoved)="onMultipleItemRemoved($event)"
-                 (ngxAutCompleteWindowChanged)="onMultipleWindowChange($event)"
-                 placeholder="🔎Search">
-
+          <input type="number" [value]="maxResults()" (input)="setMaxResults($event.target)" style="width: 80px"
+                 min="0" max="999">
+          <label style="margin-left: 10px">Max Results (0 = All)</label>
+        </div>
+        <div style="margin: 20px 0 20px 0"></div>
+        <div>
+          <input type="checkbox" [checked]="multiple()" (change)="setMultiple($event.target)">
+          <label style="margin-left: 10px">Multiple</label>
+        </div>
+        <div style="margin: 20px 0 20px 0"></div>
+        <div>
+          <input type="checkbox" [checked]="showWindowOnFocus()" (change)="setShowWindowOnFocus($event.target)">
+          <label style="margin-left: 10px">Show Window on Focus</label>
+        </div>
+        <div style="margin: 20px 0 20px 0"></div>
+        <div>
+          <select (change)="setStyle($event.target)" style="width: 88px">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+          <label style="margin-left: 10px">Style</label>
+        </div>
+        <div style="margin: 20px 0 20px 0"></div>
+        <div>
+          <input type="text" [value]="checkboxColor()" (input)="setCheckboxColor($event.target)" style="width: 80px">
+          <label style="margin-left: 10px">Checkbox Color</label>
+        </div>
+        <div style="margin: 20px 0 20px 0"></div>
+        <div>
+          <input type="text" [value]="maxHeight()" (input)="setMaxHeight($event.target)" style="width: 80px">
+          <label style="margin-left: 10px">Max Height</label>
         </div>
       </div>
 
-      <div class="column">
+    <h3>Selected: {{ items() }}</h3>
 
-        <h1>Single selection</h1>
-        <h3>Selected: {{ singleItem() }}</h3>
-        <h3>
-          Window opened: {{ singleWindowOpened() }}
-        </h3>
-        <div>
-          <input
-            [ngxAutoComplete]="sampleData"
-            [showWindowOnFocus]="true"
-            [multiple]="false"
-            (ngxAutoCompleteItemSelected)="onSingleItemSelected($event)"
-            (ngxAutoCompleteItemRemoved)="onSingleItemRemoved()"
-            (ngxAutCompleteWindowChanged)="onSingleWindowChange($event)"
-            placeholder="🔎Search">
+    <h3>
+      Window opened: {{ windowOpened() }}
+    </h3>
 
-        </div>
-      </div>
-    </div>
-    <div style="height: 300px"></div>
+    <div class="card">
+      <div class="container">
+        <input class="search"
+               [ngxAutoComplete]="sampleData"
+               [multiple]="multiple()"
+               [ngxAutoCompleteMaxResults]="maxResults()"
+               [showWindowOnFocus]="showWindowOnFocus()"
+               [style]="style()"
+               [checkboxColor]="checkboxColor()"
+               [maxHeight]="maxHeight()"
+               (ngxAutoCompleteItemSelected)="onItemSelected($event)"
+               (ngxAutoCompleteItemRemoved)="onItemRemoved($event)"
+               (ngxAutCompleteWindowChanged)="onWindowChange($event)"
+               placeholder="🔎Search">
 
-    <div class="row">
-      <div class="column">
-        <h1>Dark mode with custom checkbox color</h1>
-        <div>
-          <input class="dark"
-                 [ngxAutoComplete]="bigSampleData"
-                 [showWindowOnFocus]="true"
-                 [multiple]="true"
-                 [style]="'dark'"
-                 [checkboxColor]="'#00ef0b'"
-                 [maxHeight]="'150px'"
-                 [ngxAutoCompleteMaxResults]="3"
-                 placeholder="🔎Search">
-        </div>
       </div>
     </div>
   `
@@ -98,40 +104,90 @@ import {bigSampleData} from "./big-data";
 export class AppComponent {
   sampleData = ['Stockholm', 'Oslo', 'Copenhagen', 'Helsinki', 'Amsterdam', 'Figi'];
 
-  singleItem = signal<string>('');
-  multipleItems = signal<string[]>([]);
+  maxResults = signal<number>(0);
+  multiple = signal<boolean>(true);
+  showWindowOnFocus = signal<boolean>(true);
+  style = signal<'light' | 'dark'>('light');
+  checkboxColor = signal<string>('#a8a8a8');
+  maxHeight = signal<string>('400px');
 
-  singleWindowOpened = signal(false);
-  multipleWindowOpened = signal(false);
+  items = signal<string[]>([]);
 
-  onMultipleItemSelected(item: string) {
-    this.multipleItems.set([...this.multipleItems(), item]);
+  windowOpened = signal(false);
+
+  constructor() {
+    effect(() => {
+      const multiple = this.multiple();
+
+      this.items.set([]);
+    }, {
+      allowSignalWrites: true
+    });
   }
 
-  onSingleItemSelected(item: string) {
-    this.singleItem.set(item);
+  onItemSelected(item: string) {
+    this.multiple()
+      ? this.items.set([...this.items(), item])
+      : this.items.set([item]);
   }
 
-  onMultipleItemRemoved(item: string) {
+  onItemRemoved(item: string) {
     if (item === '') {
-      this.multipleItems.set([]);
+      this.items.set([]);
       return;
     }
 
-    this.multipleItems.update(items => items.filter(i => i !== item));
+    this.multiple()
+      ? this.items.set(this.items().filter(i => i !== item))
+      : this.items.set([]);
   }
 
-  onSingleItemRemoved() {
-    this.singleItem.set('');
+
+  onWindowChange(event: NgxAutoCompleteWindowEvent) {
+    this.windowOpened.set(event.opened);
   }
 
-  onSingleWindowChange(event: NgxAutoCompleteWindowEvent) {
-    this.singleWindowOpened.set(event.opened);
+  setMaxResults(value: EventTarget | null) {
+    const parsedValue = value as HTMLInputElement;
+
+    if (parsedValue?.value !== null) {
+      let value = parseInt(parsedValue.value, 10);
+
+      if (isNaN(value)) {
+        value = 0;
+      }
+
+      if (value < 0) {
+        value = 0;
+      }
+
+      if (value > 999) {
+        value = 999;
+      }
+
+      this.maxResults.set(value);
+    }
   }
 
-  onMultipleWindowChange(event: NgxAutoCompleteWindowEvent) {
-    this.multipleWindowOpened.set(event.opened);
+  setMultiple(target: EventTarget | null) {
+    this.multiple.set((target as HTMLInputElement).checked);
   }
 
-  protected readonly bigSampleData = bigSampleData;
+
+  setShowWindowOnFocus(target: EventTarget | null) {
+    this.showWindowOnFocus.set((target as HTMLInputElement).checked);
+  }
+
+  setStyle(target: EventTarget | null) {
+    const style = (target as HTMLSelectElement).value as 'light' | 'dark';
+    this.style.set(style);
+  }
+
+  setCheckboxColor(target: EventTarget | null) {
+    this.checkboxColor.set((target as HTMLInputElement).value);
+  }
+
+  setMaxHeight(target: EventTarget | null) {
+    this.maxHeight.set((target as HTMLInputElement).value);
+  }
 }
