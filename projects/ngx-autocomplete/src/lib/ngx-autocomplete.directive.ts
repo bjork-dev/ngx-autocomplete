@@ -39,9 +39,12 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
   selectionIndex = signal(-1);
 
   dataItems = computed(() => {
-    return this.ngxAutoComplete().map((item, _) => {
-      return {value: item, id: uuidv4()} as NgxAutoCompleteDataItem;
-    });
+    const items = this.ngxAutoComplete();
+    let dataItems: NgxAutoCompleteDataItem[] = [];
+    for (let i = 0; i < items.length ; i++) {
+      dataItems.push({value: items[i], id: i});
+    }
+    return dataItems;
   });
 
   private searchResultComponent: ComponentRef<SearchResultComponent>;

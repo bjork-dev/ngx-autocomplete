@@ -1,17 +1,16 @@
 import {Searcher} from "./searcher";
 import {NgxAutoCompleteDataItem} from "./ngx-auto-complete-data.item";
-import {v4 as uuidv4} from 'uuid';
 
 describe('Searcher', () => {
   let searcher: Searcher;
 
   const allItems: NgxAutoCompleteDataItem[] = [
-    {value: 'Stockholm', id: uuidv4()},
-    {value: 'Oslo', id: uuidv4()},
-    {value: 'Copenhagen', id: uuidv4()},
-    {value: 'Helsinki', id: uuidv4()},
-    {value: 'Amsterdam', id: uuidv4()},
-    {value: 'Figi', id: uuidv4()}
+    {value: 'Stockholm', id:1},
+    {value: 'Oslo', id: 2},
+    {value: 'Copenhagen', id: 3},
+    {value: 'Helsinki', id: 4},
+    {value: 'Amsterdam', id: 5},
+    {value: 'Figi', id: 6}
   ];
 
   beforeEach(() => {
