@@ -1,5 +1,8 @@
 {
   "name": "@bjorkdev/ngx-autocomplete",
+  "author": "bjorkdev",
+  "description": "Angular autocomplete directive",
+
   "version": "0.1.4",
   "peerDependencies": {
     "@angular/common": "^18.1.0",
@@ -10,6 +13,11 @@
   },
   "license": "MIT",
   "homepage": "https://bjork-dev.github.io/ngx-autocomplete/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bjork-dev/ngx-autocomplete"
+  },
+  "bugs": "https://github.com/bjork-dev/ngx-autocomplete/issues",
   "sideEffects": false,
   "publishConfig": {
     "access": "public",
