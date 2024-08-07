@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
-  ComponentRef, computed,
+  ComponentRef,
+  computed,
   DestroyRef,
   Directive,
   effect,
@@ -11,13 +12,13 @@ import {
   signal,
   ViewContainerRef
 } from '@angular/core';
-import {Searcher} from "./searcher";
+import {Searcher} from "./util/searcher";
 import {SearchResultComponent} from "./search-result/search-result.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {filter, fromEvent, tap} from "rxjs";
 import {NgxAutoCompleteWindowEvent} from "./events/ngx-auto-complete-window.event";
 import {NgxAutoCompleteDataItem} from "./ngx-auto-complete-data.item";
-import { v4 as uuidv4 } from 'uuid';
+import {relevantKeys} from "./relevant-keys";
 
 @Directive({
   standalone: true,
@@ -41,7 +42,7 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
   dataItems = computed(() => {
     const items = this.ngxAutoComplete();
     let dataItems: NgxAutoCompleteDataItem[] = [];
-    for (let i = 0; i < items.length ; i++) {
+    for (let i = 0; i < items.length; i++) {
       dataItems.push({value: items[i], id: i});
     }
     return dataItems;
@@ -124,54 +125,6 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
       takeUntilDestroyed(this.destroyRef),
       filter((ev: Event) => !this.searchResultComponent.instance.hidden()
         && ev.target !== this.elementRef.nativeElement && this.searchResultComponent.instance.elementRef.nativeElement.contains(ev.target) === false),
-      tap((event: any) => {
-        if (!this.multiple()) {
-          this.clearInput();
-        }
-        this.closeWindow()
-      })
-    ).subscribe();
-
-    fromEvent(document, 'keydown').pipe(
-      takeUntilDestroyed(this.destroyRef),
-      filter((ev: any) => !this.searchResultComponent.instance.hidden() && ev.key === 'Enter'),
-      tap((event: any) => {
-        event.preventDefault();
-        const selectedItem = this.searchResultComponent.instance.items()[this.selectionIndex()];
-        if (selectedItem) {
-          this.searchResultComponent.instance.selectOrRemoveItem((selectedItem));
-          if (!this.multiple()) {
-            this.closeWindow();
-          }
-        }
-      })).subscribe();
-
-    fromEvent(document, 'keydown').pipe(
-      takeUntilDestroyed(this.destroyRef),
-      filter((ev: any) => !this.searchResultComponent.instance.hidden() && ev.key === 'Backspace'),
-      tap((event: Event) => {
-        event.preventDefault();
-        const items = this.searchResultComponent.instance._selectedItems();
-        if (items.length === 0) {
-          // if no items are selected just clear the current input character
-          this.renderer.setProperty(this.elementRef.nativeElement, 'value', this.elementRef.nativeElement.value.slice(0, -1));
-          return;
-        }
-
-        // if the user has entered a partial query, remove it instead of the last item
-        const query = this.elementRef.nativeElement.value.split(',').pop().trim();
-        if (query !== '') {
-          this.renderer.setProperty(this.elementRef.nativeElement, 'value', this.elementRef.nativeElement.value.slice(0, -1));
-          return;
-        }
-
-        const lastItem = items[items.length - 1];
-        this.searchResultComponent.instance.selectOrRemoveItem((lastItem));
-      })).subscribe();
-
-    fromEvent(document, 'keydown').pipe(
-      takeUntilDestroyed(this.destroyRef),
-      filter((ev: any) => !this.searchResultComponent.instance.hidden() && ev.key === 'Escape'),
       tap(() => {
         if (!this.multiple()) {
           this.clearInput();
@@ -182,54 +135,109 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
 
     fromEvent(document, 'keydown').pipe(
       takeUntilDestroyed(this.destroyRef),
-      filter((ev: any) => !this.searchResultComponent.instance.hidden() && ev.key === 'ArrowDown'),
-      tap(((event: Event) => {
-        event.preventDefault();
-
-        this.selectionIndex.set(this.selectionIndex() + 1);
-
-        if (this.selectionIndex() >= this.searchResultComponent.instance.items().length) {
-          this.selectionIndex.set(0);
-        }
-        if (!this.multiple()) {
-          this.renderer.setProperty(this.elementRef.nativeElement, 'value', this.searchResultComponent.instance.items()[this.selectionIndex()].value);
-        }
-
-        const childItems = this.searchResultComponent.instance.elementRef.nativeElement.children[0].children;
-
-        this.renderer.addClass(childItems[this.selectionIndex()], 'highlight');
-        if (this.selectionIndex() > 0) {
-          this.renderer.removeClass(childItems[this.selectionIndex() - 1], 'highlight');
-        } else {
-          this.renderer.removeClass(childItems[childItems.length - 1], 'highlight');
-        }
-      }))).subscribe();
-
-    fromEvent(document, 'keydown').pipe(
-      takeUntilDestroyed(this.destroyRef),
-      filter((ev: any) => !this.searchResultComponent.instance.hidden() && ev.key === 'ArrowUp'),
-      tap((event: Event) => {
-        event.preventDefault();
-
-        this.selectionIndex.set(this.selectionIndex() - 1);
-
-        if (this.selectionIndex() < 0) {
-          this.selectionIndex.set(this.searchResultComponent.instance.items().length - 1);
-        }
-
-        if (!this.multiple()) {
-          this.renderer.setProperty(this.elementRef.nativeElement, 'value', this.searchResultComponent.instance.items()[this.selectionIndex()].value);
-        }
-
-        const childItems = this.searchResultComponent.instance.elementRef.nativeElement.children[0].children;
-
-        this.renderer.addClass(childItems[this.selectionIndex()], 'highlight');
-        if (this.selectionIndex() < childItems.length - 1) {
-          this.renderer.removeClass(childItems[this.selectionIndex() + 1], 'highlight');
-        } else {
-          this.renderer.removeClass(childItems[0], 'highlight');
+      filter((ev: any) => !this.searchResultComponent.instance.hidden() && relevantKeys.includes(ev.key)),
+      tap((event: any) => {
+        switch (event.key) {
+          case 'Enter':
+            this.handleEnter(event);
+            break;
+          case 'Backspace':
+            this.handleBackspace(event);
+            break;
+          case 'Escape':
+            this.handleEscape();
+            break;
+          case 'ArrowDown':
+            this.handleArrowDown(event);
+            break;
+          case 'ArrowUp':
+            this.handleArrowUp(event);
+            break;
         }
       })).subscribe();
+  }
+
+  handleEnter(event: Event) {
+    event.preventDefault();
+    const selectedItem = this.searchResultComponent.instance.items()[this.selectionIndex()];
+    if (selectedItem) {
+      this.searchResultComponent.instance.selectOrRemoveItem((selectedItem));
+      if (!this.multiple()) {
+        this.closeWindow();
+      }
+    }
+  }
+
+  handleBackspace(event: Event) {
+    event.preventDefault();
+    const items = this.searchResultComponent.instance._selectedItems();
+    if (items.length === 0) {
+      // if no items are selected just clear the current input character
+      this.renderer.setProperty(this.elementRef.nativeElement, 'value', this.elementRef.nativeElement.value.slice(0, -1));
+      return;
+    }
+
+    // if the user has entered a partial query, remove it instead of the last item
+    const query = this.elementRef.nativeElement.value.split(',').pop().trim();
+    if (query !== '') {
+      this.renderer.setProperty(this.elementRef.nativeElement, 'value', this.elementRef.nativeElement.value.slice(0, -1));
+      return;
+    }
+
+    const lastItem = items[items.length - 1];
+    this.searchResultComponent.instance.selectOrRemoveItem((lastItem));
+  }
+
+  handleEscape() {
+    if (!this.multiple()) {
+      this.clearInput();
+    }
+    this.closeWindow();
+  }
+
+  handleArrowDown(event: Event) {
+    event.preventDefault();
+
+    this.selectionIndex.set(this.selectionIndex() + 1);
+
+    if (this.selectionIndex() >= this.searchResultComponent.instance.items().length) {
+      this.selectionIndex.set(0);
+    }
+    if (!this.multiple()) {
+      this.renderer.setProperty(this.elementRef.nativeElement, 'value', this.searchResultComponent.instance.items()[this.selectionIndex()].value);
+    }
+
+    const childItems = this.searchResultComponent.instance.elementRef.nativeElement.children[0].children;
+
+    this.renderer.addClass(childItems[this.selectionIndex()], 'highlight');
+    if (this.selectionIndex() > 0) {
+      this.renderer.removeClass(childItems[this.selectionIndex() - 1], 'highlight');
+    } else {
+      this.renderer.removeClass(childItems[childItems.length - 1], 'highlight');
+    }
+  }
+
+  handleArrowUp(event: Event) {
+    event.preventDefault();
+
+    this.selectionIndex.set(this.selectionIndex() - 1);
+
+    if (this.selectionIndex() < 0) {
+      this.selectionIndex.set(this.searchResultComponent.instance.items().length - 1);
+    }
+
+    if (!this.multiple()) {
+      this.renderer.setProperty(this.elementRef.nativeElement, 'value', this.searchResultComponent.instance.items()[this.selectionIndex()].value);
+    }
+
+    const childItems = this.searchResultComponent.instance.elementRef.nativeElement.children[0].children;
+
+    this.renderer.addClass(childItems[this.selectionIndex()], 'highlight');
+    if (this.selectionIndex() < childItems.length - 1) {
+      this.renderer.removeClass(childItems[this.selectionIndex() + 1], 'highlight');
+    } else {
+      this.renderer.removeClass(childItems[0], 'highlight');
+    }
   }
 
   configureInputs() {
@@ -271,5 +279,4 @@ export class NxgAutoCompleteDirective implements AfterViewInit {
     this.searchResultComponent.instance.hidden.set(false);
     this.ngxAutCompleteWindowChanged.emit({opened: true});
   }
-
 }

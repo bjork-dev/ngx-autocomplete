@@ -1,5 +1,5 @@
 import {Searcher} from "./searcher";
-import {NgxAutoCompleteDataItem} from "./ngx-auto-complete-data.item";
+import {NgxAutoCompleteDataItem} from "../ngx-auto-complete-data.item";
 
 describe('Searcher', () => {
   let searcher: Searcher;

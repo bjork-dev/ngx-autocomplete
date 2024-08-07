@@ -1,4 +1,4 @@
-import {NgxAutoCompleteDataItem} from "./ngx-auto-complete-data.item";
+import {NgxAutoCompleteDataItem} from "../ngx-auto-complete-data.item";
 
 class Rater {
   item: NgxAutoCompleteDataItem;
